@@ -1,6 +1,6 @@
 // Import necessary components and hooks from React and UI libraries
 import { Button } from "@/components/ui/button";
-import { MoonIcon, SunIcon } from "lucide-react"; // Assuming you want to add dark mode toggle
+// import { MoonIcon, SunIcon } from "lucide-react"; // Assuming you want to add dark mode toggle
 
 // Header component for the blog application
 function Header() {
