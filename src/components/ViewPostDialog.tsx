@@ -16,6 +16,7 @@ interface Post {
 }
 
 interface ViewPostDialogProps {
+  posts: Post[];
   postId: number | null;
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +24,7 @@ interface ViewPostDialogProps {
 
 export function ViewPostDialog({
   postId,
+  posts,
   isOpen,
   onClose,
 }: ViewPostDialogProps) {
@@ -32,21 +34,30 @@ export function ViewPostDialog({
   useEffect(() => {
     if (postId && isOpen) {
       setLoading(true);
-      setPost(null); // Clear previous post
-      axios
-        .get<Post>(`https://jsonplaceholder.typicode.com/posts/${postId}`)
-        .then((response) => {
-          setPost(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching post:", error);
-          setPost(null); // Ensure post is null on error
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      const localPost = posts.find((p) => p.id === postId);
+
+      if (localPost) {
+        // If post is found locally, use it directly
+        setPost(localPost);
+        setLoading(false);
+      } else {
+        // Otherwise, fetch from API (for posts not in the initial list)
+        setPost(null); // Clear previous post
+        axios
+          .get<Post>(`https://jsonplaceholder.typicode.com/posts/${postId}`)
+          .then((response) => {
+            setPost(response.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching post:", error);
+            setPost(null); // Ensure post is null on error
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
     }
-  }, [postId, isOpen]);
+  }, [postId, isOpen, posts]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

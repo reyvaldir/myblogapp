@@ -82,6 +82,7 @@ function App() {
 
         {/* Dialog for viewing posts */}
         <ViewPostDialog
+          posts={posts}
           postId={selectedPostId}
           isOpen={viewDialogOpen}
           onClose={() => {

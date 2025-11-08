@@ -18,7 +18,7 @@ function Header() {
     // bg-blue-950: dark blue background for light mode
     // dark:bg-gray-800: dark mode background color
     // dark:border-gray-700: dark mode border color
-    <header className="site-header flex justify-between items-center w-full p-4 border-b bg-blue-950 dark:bg-gray-800 dark:border-gray-700">
+    <header className="site-header flex justify-between items-center w-full p-4 border-b bg-lime-500 dark:bg-lime-500 dark:border-gray-700">
       {/* Left section: Blog title/logo */}
       <h1 className="text-2xl font-bold tracking-tight text-white dark:text-white">
         My React Blog
