@@ -1,4 +1,3 @@
-// Import UI components from shadcn/ui
 import {
   Card,
   CardContent,
@@ -6,8 +5,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Define the structure of a Post object
 interface Post {
   id: number;
   title: string;
@@ -15,32 +14,43 @@ interface Post {
   userId: number;
 }
 
-// Define props for PostList component
 interface PostListProps {
-  posts: Post[]; // Array of posts to display
+  posts: Post[];
+  loading: boolean;
+  onPostSelect: (post: Post) => void;
 }
 
-// PostList component to display a grid of posts
-export function PostList({ posts }: PostListProps) {
+export function PostList({ posts, loading, onPostSelect }: PostListProps) {
+  if (loading) {
+    return (
+      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <Card key={index} className="h-full">
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
   return (
-    // Container with responsive grid layout
-    // gap-4: spacing between cards
-    // p-4: padding around the grid
-    // md:grid-cols-2: 2 columns on medium screens
-    // lg:grid-cols-3: 3 columns on large screens
     <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
-      {/* Map through posts array to create cards */}
       {posts.map((post) => (
-        // Card component for each post
-        // key: unique identifier for React's reconciliation
-        // h-full: make all cards same height
-        <Card key={post.id} className="h-full">
+        <Card
+          key={post.id}
+          className="h-full cursor-pointer transition-shadow hover:shadow-lg"
+          onClick={() => onPostSelect(post)}
+        >
           <CardHeader>
-            {/* Post title with line clamp for consistent height */}
             <CardTitle className="line-clamp-2">{post.title}</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Post body with line clamp to prevent long text */}
             <CardDescription className="line-clamp-3">
               {post.body}
             </CardDescription>

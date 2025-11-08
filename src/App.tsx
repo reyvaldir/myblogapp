@@ -3,6 +3,7 @@ import "./App.css";
 import { CreatePostDialog } from "./components/CreatePostDialog";
 import Header from "./components/Header";
 import { PostList } from "./components/PostList";
+import { ViewPostDialog } from "./components/ViewPostDialog";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -47,14 +48,17 @@ function App() {
 
   // Handler function for adding new posts
   // Adds the new post to the beginning of the posts array
-  const handleAddPost = (newPost: Post) => {
-    setPosts([newPost, ...posts]);
-  };
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
 
-  // Show loading state while fetching data
-  if (loading) {
-    return <div className="p-4">Loading posts...</div>;
-  }
+  const handleAddPost = (newPost: Post) => {
+    // Add new post with an incremented ID
+    const postWithId = {
+      ...newPost,
+      id: Math.max(...posts.map((p) => p.id), 0) + 1,
+    };
+    setPosts([postWithId, ...posts]);
+  };
 
   // Main component render
   return (
@@ -62,13 +66,29 @@ function App() {
       {/* Header component for the blog */}
       <Header />
 
-      {/* Dialog component for creating new posts */}
-      {/* Passes handleAddPost function to update posts state when a new post is created */}
-      <CreatePostDialog onPostCreated={handleAddPost} />
+      <div className="p-4">
+        {/* Dialog component for creating new posts */}
+        <CreatePostDialog onPostCreated={handleAddPost} />
 
-      {/* Component to display all posts */}
-      {/* Receives posts array as prop to render the list of posts */}
-      <PostList posts={posts} />
+        {/* Component to display all posts */}
+        <PostList
+          posts={posts}
+          loading={loading}
+          onPostSelect={(post) => {
+            setSelectedPostId(post.id);
+            setViewDialogOpen(true);
+          }}
+        />
+
+        {/* Dialog for viewing posts */}
+        <ViewPostDialog
+          postId={selectedPostId}
+          isOpen={viewDialogOpen}
+          onClose={() => {
+            setViewDialogOpen(false);
+          }}
+        />
+      </div>
     </>
   );
 }
