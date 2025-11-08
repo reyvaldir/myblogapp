@@ -1,6 +1,6 @@
 // Import necessary components and hooks from React and UI libraries
 import { Button } from "@/components/ui/button";
-import { MoonIcon, SunIcon } from "lucide-react"; // Assuming you want to add dark mode toggle
+// import { MoonIcon, SunIcon } from "lucide-react"; // Assuming you want to add dark mode toggle
 
 // Header component for the blog application
 function Header() {
@@ -18,7 +18,7 @@ function Header() {
     // bg-blue-950: dark blue background for light mode
     // dark:bg-gray-800: dark mode background color
     // dark:border-gray-700: dark mode border color
-    <header className="flex justify-between items-center w-full p-4 border-b bg-blue-950 dark:bg-gray-800 dark:border-gray-700">
+    <header className="site-header flex justify-between items-center w-full p-4 border-b bg-blue-950 dark:bg-gray-800 dark:border-gray-700">
       {/* Left section: Blog title/logo */}
       <h1 className="text-2xl font-bold tracking-tight text-white dark:text-white">
         My React Blog

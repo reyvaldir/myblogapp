@@ -16,6 +16,20 @@
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+
+  /* Make the header background stretch the entire viewport while
+     keeping its inner content centered and aligned. This lets the
+     header appear full-bleed while main content stays inside the
+     centered container. */
+  .site-header {
+    position: relative;    /* keep header in normal flow */
+    width: 100vw;          /* span full viewport width */
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;    /* pull edges to viewport edges */
+    margin-right: -50vw;
+    z-index: 10;           /* stay above other content if needed */
+  }
 }
 
 @keyframes logo-spin {
