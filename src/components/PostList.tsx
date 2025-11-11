@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -17,10 +18,9 @@ interface Post {
 interface PostListProps {
   posts: Post[];
   loading: boolean;
-  onPostSelect: (post: Post) => void;
 }
 
-export function PostList({ posts, loading, onPostSelect }: PostListProps) {
+export function PostList({ posts, loading }: PostListProps) {
   if (loading) {
     return (
       <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
@@ -42,20 +42,20 @@ export function PostList({ posts, loading, onPostSelect }: PostListProps) {
   return (
     <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
       {posts.map((post) => (
-        <Card
-          key={post.id}
-          className="h-full cursor-pointer transition-shadow hover:shadow-lg"
-          onClick={() => onPostSelect(post)}
-        >
-          <CardHeader>
-            <CardTitle className="line-clamp-2">{post.title}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription className="line-clamp-3">
-              {post.body}
-            </CardDescription>
-          </CardContent>
-        </Card>
+        <Link to={`/posts/${post.id}`} key={post.id}>
+          <Card
+            className="h-full cursor-pointer transition-shadow hover:shadow-lg"
+          >
+            <CardHeader>
+              <CardTitle className="line-clamp-2">{post.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="line-clamp-3">
+                {post.body}
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );
