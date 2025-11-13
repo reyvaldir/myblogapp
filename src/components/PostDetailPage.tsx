@@ -6,6 +6,8 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 type Post = {
   id: number;
@@ -29,11 +31,21 @@ export function PostDetailPage({ posts }: PostDetailPageProps) {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState("");
-  const [newCommentName, setNewCommentName] = useState("");
-  const [newCommentEmail, setNewCommentEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 1. Define the validation schema with Yup
+  const validationSchema = Yup.object({
+    name: Yup.string()
+      .min(3, "Name must be at least 3 characters")
+      .required("Name is required"),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    body: Yup.string()
+      .min(5, "Comment must be at least 5 characters")
+      .required("Comment is required"),
+  });
+
+  // 2. Initialize Formik
   useEffect(() => {
     async function fetchPost() {
       try {
@@ -65,40 +77,41 @@ export function PostDetailPage({ posts }: PostDetailPageProps) {
     fetchPost();
   }, [id, posts]);
 
-  const handleCommentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim() || !newCommentName.trim() || !newCommentEmail.trim())
-      return;
-
-    setIsSubmitting(true);
-    try {
-      const response = await fetch(
-        `https://jsonplaceholder.typicode.com/posts/${id}/comments`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            body: newComment,
-            email: newCommentEmail,
-            name: newCommentName,
-          }),
-          headers: {
-            "Content-type": "application/json; charset=UTF-8",
-          },
-        }
-      );
-      const createdComment = await response.json();
-      setComments([createdComment, ...comments]);
-      setNewComment("");
-      setNewCommentName("");
-      setNewCommentEmail("");
-      toast.success("Comment posted successfully!");
-    } catch (error) {
-      console.error("Error posting comment:", error);
-      toast.error("Failed to post comment.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      email: "",
+      body: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
+      try {
+        const response = await fetch(
+          `https://jsonplaceholder.typicode.com/posts/${id}/comments`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              name: values.name,
+              email: values.email,
+              body: values.body,
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          }
+        );
+        const createdComment = await response.json();
+        setComments([createdComment, ...comments]);
+        resetForm();
+        toast.success("Comment posted successfully!");
+      } catch (error) {
+        console.error("Error posting comment:", error);
+        toast.error("Failed to post comment.");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+  });
 
   return (
     <div className="container mx-auto max-w-[70%] px-4 y-8">
@@ -129,40 +142,65 @@ export function PostDetailPage({ posts }: PostDetailPageProps) {
 
       <div className="mt-8">
         <form
-          onSubmit={handleCommentSubmit}
+          onSubmit={formik.handleSubmit}
           className="mb-8 space-y-4 bg-gray-100 p-4 rounded-lg"
         >
           <h2 className="text-2xl font-bold mb-4">Leave a Comments</h2>
-          <Input
-            value={newCommentName}
-            onChange={(e) => setNewCommentName(e.target.value)}
-            placeholder="Your name..."
-            type="text"
-            disabled={isSubmitting}
-          />
-          <Input
-            value={newCommentEmail}
-            onChange={(e) => setNewCommentEmail(e.target.value)}
-            placeholder="Your email..."
-            type="email"
-            disabled={isSubmitting}
-          />
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            disabled={isSubmitting}
-          />
+          <div>
+            <Input
+              id="name"
+              name="name"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Your name..."
+              type="text"
+              disabled={formik.isSubmitting}
+            />
+            {formik.touched.name && formik.errors.name ? (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.name}
+              </div>
+            ) : null}
+          </div>
+          <div>
+            <Input
+              id="email"
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Your email..."
+              type="email"
+              disabled={formik.isSubmitting}
+            />
+            {formik.touched.email && formik.errors.email ? (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.email}
+              </div>
+            ) : null}
+          </div>
+          <div>
+            <Textarea
+              id="body"
+              name="body"
+              value={formik.values.body}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              placeholder="Write a comment..."
+              disabled={formik.isSubmitting}
+            />
+            {formik.touched.body && formik.errors.body ? (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.body}
+              </div>
+            ) : null}
+          </div>
           <Button
             type="submit"
-            disabled={
-              isSubmitting ||
-              !newComment.trim() ||
-              !newCommentName.trim() ||
-              !newCommentEmail.trim()
-            }
+            disabled={formik.isSubmitting || !formik.isValid}
           >
-            {isSubmitting ? "Submitting..." : "Submit Comment"}
+            {formik.isSubmitting ? "Submitting..." : "Submit Comment"}
           </Button>
         </form>
 
@@ -198,7 +236,7 @@ export function PostDetailPage({ posts }: PostDetailPageProps) {
             ))}
           </div>
         ) : (
-          <p>No comments yet.</p>
+          <h3>No comments yet.</h3>
         )}
       </div>
     </div>
