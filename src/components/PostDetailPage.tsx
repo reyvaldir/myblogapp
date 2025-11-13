@@ -101,7 +101,8 @@ export function PostDetailPage({ posts }: PostDetailPageProps) {
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto max-w-[70%] px-4 y-8">
+      <h2 className="text-2xl font-bold mb-4">Post Details</h2>
       {loading ? (
         <Card>
           <CardHeader>
@@ -127,19 +128,22 @@ export function PostDetailPage({ posts }: PostDetailPageProps) {
       )}
 
       <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Comments</h2>
-
-        <form onSubmit={handleCommentSubmit} className="mb-8 space-y-4">
+        <form
+          onSubmit={handleCommentSubmit}
+          className="mb-8 space-y-4 bg-gray-100 p-4 rounded-lg"
+        >
+          <h2 className="text-2xl font-bold mb-4">Leave a Comments</h2>
           <Input
             value={newCommentName}
             onChange={(e) => setNewCommentName(e.target.value)}
-            placeholder="Your name"
+            placeholder="Your name..."
+            type="text"
             disabled={isSubmitting}
           />
           <Input
             value={newCommentEmail}
             onChange={(e) => setNewCommentEmail(e.target.value)}
-            placeholder="Your email"
+            placeholder="Your email..."
             type="email"
             disabled={isSubmitting}
           />
@@ -162,6 +166,7 @@ export function PostDetailPage({ posts }: PostDetailPageProps) {
           </Button>
         </form>
 
+        <h2 className="text-2xl font-bold mb-4">Comments</h2>
         {loading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
