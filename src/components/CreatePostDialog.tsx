@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Define the structure of a Post
 interface Post {
@@ -75,21 +76,6 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    formik.validateForm().then((errors) => {
-      if (Object.keys(errors).length > 0) {
-        formik.setTouched({
-          title: true,
-          body: true,
-        });
-        toast.error("Please fill out all required fields.");
-      } else {
-        formik.handleSubmit(e);
-      }
-    });
-  };
-
   return (
     // Dialog component with controlled open state
     <Dialog open={open} onOpenChange={setOpen}>
@@ -103,7 +89,19 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
           <DialogTitle>Create a New Post</DialogTitle>
         </DialogHeader>
         {/* Form with Formik integration */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={formik.handleSubmit} className="space-y-4">
+          {formik.errors.title && formik.touched.title && (
+            <Alert variant="destructive">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{formik.errors.title}</AlertDescription>
+            </Alert>
+          )}
+          {formik.errors.body && formik.touched.body && (
+            <Alert variant="destructive">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{formik.errors.body}</AlertDescription>
+            </Alert>
+          )}
           {/* Title input field */}
           <div>
             <Label htmlFor="title">Title</Label>
@@ -115,10 +113,6 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
               onBlur={formik.handleBlur}
               disabled={formik.isSubmitting}
             />
-            {/* Show error message if title field is touched and has error */}
-            {formik.touched.title && formik.errors.title && (
-              <p className="text-sm text-red-500">{formik.errors.title}</p>
-            )}
           </div>
           {/* Content input field */}
           <div>
@@ -131,10 +125,6 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
               onBlur={formik.handleBlur}
               disabled={formik.isSubmitting}
             />
-            {/* Show error message if body field is touched and has error */}
-            {formik.touched.body && formik.errors.body && (
-              <p className="text-sm text-red-500">{formik.errors.body}</p>
-            )}
           </div>
           {/* Submit button */}
           <Button type="submit" disabled={formik.isSubmitting}>
