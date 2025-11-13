@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useFormik } from "formik"; // Form handling library
 import * as Yup from "yup"; // Form validation library
 import axios from "axios"; // HTTP client library
+import { toast } from "sonner"; // Toast notifications
 
 // Import UI components from shadcn/ui
 import {
@@ -15,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // Define the structure of a Post
 interface Post {
@@ -46,7 +48,7 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
       body: Yup.string().required("Content is required"),
     }),
     // Form submission handler
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setSubmitting }) => {
       try {
         // Send POST request to API
         const response = await axios.post(
@@ -59,15 +61,34 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
 
         // Notify parent component of new post
         onPostCreated(response.data);
+        toast.success("Post created successfully!");
 
         // Reset form and close dialog on success
         formik.resetForm();
         setOpen(false);
       } catch (error) {
         console.error("Error creating post:", error);
+        toast.error("Error creating post. Please try again.");
+      } finally {
+        setSubmitting(false);
       }
     },
   });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    formik.validateForm().then((errors) => {
+      if (Object.keys(errors).length > 0) {
+        formik.setTouched({
+          title: true,
+          body: true,
+        });
+        toast.error("Please fill out all required fields.");
+      } else {
+        formik.handleSubmit(e);
+      }
+    });
+  };
 
   return (
     // Dialog component with controlled open state
@@ -82,7 +103,7 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
           <DialogTitle>Create a New Post</DialogTitle>
         </DialogHeader>
         {/* Form with Formik integration */}
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Title input field */}
           <div>
             <Label htmlFor="title">Title</Label>
@@ -92,6 +113,7 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
               value={formik.values.title}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
             />
             {/* Show error message if title field is touched and has error */}
             {formik.touched.title && formik.errors.title && (
@@ -101,12 +123,13 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
           {/* Content input field */}
           <div>
             <Label htmlFor="body">Content</Label>
-            <Input
+            <Textarea
               id="body"
               name="body"
               value={formik.values.body}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
+              disabled={formik.isSubmitting}
             />
             {/* Show error message if body field is touched and has error */}
             {formik.touched.body && formik.errors.body && (
@@ -114,7 +137,9 @@ export function CreatePostDialog({ onPostCreated }: CreatePostDialogProps) {
             )}
           </div>
           {/* Submit button */}
-          <Button type="submit">Create Post</Button>
+          <Button type="submit" disabled={formik.isSubmitting}>
+            {formik.isSubmitting ? "Creating..." : "Create Post"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
